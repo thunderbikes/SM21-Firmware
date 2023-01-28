@@ -11,6 +11,7 @@ int main_state = LOW;
 int forward_state = LOW;
 int reverse_state = LOW;
 int park_input = 0; //Park
+int voltage = 0; //voltage value read by the arduino
 boolean operation = false; //indicates whether the ignition process has occured yet
 
 void setup() {
@@ -35,9 +36,9 @@ void setup() {
 
 void loop() {
 
-  //check delay times
+  //check delay times. Most important is the allRelaysOpen. Currently 1 sec 
   //As of right now, you can only be in one 'state' at a time. This means you cannot ignite the bike while charging etc
-  //Some timings are estimates that I would like clarification on
+  //Some timings are estimates that I would like clarification on. Mostly Ignition
   //Some esitmated timings can be removed when voltage and current readings are implemented
 
   charge_state = digitalRead(charge_input);
@@ -47,6 +48,8 @@ void loop() {
     
   int park_input = park(forward_state, reverse_state);
 
+  int voltage = (5*analogRead(A0))/1023; //reads 5V
+
   //CHARGING
   if(charge_state == HIGH && park_input == 1){ //Charging. The bike must be parked. The engine can be on. While Charging, you cannot do other actions
       allRelaysOpen(); //could be an issue if you want to do something else at the same time however I don't think that would be the case
@@ -54,7 +57,7 @@ void loop() {
       digitalWrite(RL6,HIGH);
       while(charge_state == HIGH){ //add voltage and current readings to ensure it will not continue to charge after reaching max voltage/current
         Serial.print("Charging");
-        Delay(2000);
+        delay(2000);
       }
    }
 
@@ -62,7 +65,7 @@ void loop() {
   else if(main_state == HIGH && park_input == 1 && operation == false){ //ignition. Must be parked and not already 'ignited'
       allRelaysOpen();
       digitalWrite(RL3, HIGH); //how long should this be? is there a measurement to indicate when to stop it?
-      delay(3000); //3 seconds accurate?
+      delay(3000); //3 seconds accurate? idk how good my memory is *********************************************************
       operation = true;
       Serial.print("Ignition");
   }
@@ -75,7 +78,7 @@ void loop() {
       digitalWrite(RL1, HIGH);
       while(main_state == HIGH && operation && ((forward_state == HIGH && reverse_state == LOW) || (forward_state == LOW && reverse_state == HIGH))){
         Serial.print("In Operation");
-        Delay(2000);
+        delay(2000);
       }        
   }
 
@@ -101,7 +104,7 @@ void loop() {
 
   //ERROR
   else {
-    Serial.print("Not a valid state: ERROR");
+    Serial.print("Not a valid state: ERROR"); //will light up error light at some point
   }
 }
 
