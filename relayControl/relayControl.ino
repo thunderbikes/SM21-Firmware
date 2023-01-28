@@ -47,54 +47,62 @@ void loop() {
     
   int park_input = park(forward_state, reverse_state);
 
-
+  //CHARGING
   if(charge_state == HIGH && park_input == 1){ //Charging. The bike must be parked. The engine can be on. While Charging, you cannot do other actions
-      allRelaysOpen(); //could be an issue if you want to do something else at the same time
+      allRelaysOpen(); //could be an issue if you want to do something else at the same time however I don't think that would be the case
       //closed relays
       digitalWrite(RL6,HIGH);
-      while(charge_state == HIGH){ //add voltage and current readings. Should this be closed for this long or is this just the precharge?
-        Serial.println("Charging");
+      while(charge_state == HIGH){ //add voltage and current readings to ensure it will not continue to charge after reaching max voltage/current
+        Serial.print("Charging");
         Delay(2000);
       }
    }
 
-
-  if(main_state == HIGH && park_input == 1 && operation == false){ //ignition. Must be parked and not already 'ignited'
+  //IGNITION
+  else if(main_state == HIGH && park_input == 1 && operation == false){ //ignition. Must be parked and not already 'ignited'
       allRelaysOpen();
       digitalWrite(RL3, HIGH); //how long should this be? is there a measurement to indicate when to stop it?
       delay(3000); //3 seconds accurate?
       operation = true;
-      Serial.println("Ignition");
+      Serial.print("Ignition");
   }
-  if(main_state == HIGH && operation && ((forward_state == HIGH && reverse_state == LOW) || (forward_state == LOW && reverse_state == HIGH))){ //operation. 
+
+  //OPERATION
+  else if(main_state == HIGH && operation && ((forward_state == HIGH && reverse_state == LOW) || (forward_state == LOW && reverse_state == HIGH))){ //operation. 
       //Must be not in park and the bike must hav ebeen ignited and the main power switch is in
       allRelaysOpen();
       //closed relays
       digitalWrite(RL1, HIGH);
       while(main_state == HIGH && operation && ((forward_state == HIGH && reverse_state == LOW) || (forward_state == LOW && reverse_state == HIGH))){
-        Serial.println("In Operation");
+        Serial.print("In Operation");
         Delay(2000);
       }        
   }
 
-
-  if(main_state == HIGH && park_input == 1 && operation == true){ //parking after driving but leaving the bike on
-      while(main_state == HIGH && park_input == 1 && operation == true){
-        //does not change any relays but is a required state. Want to account for edge cases
-        Serial.println("In park but Bike stays on");
-      }
-
-  }
-
-  if(main_state == LOW && park_input == 1 && charge_state == LOW){  //discharge. Keys must leave, the bike must be in park and not charging
+  //DISCHARGE
+  else if(main_state == LOW && park_input == 1 && charge_state == LOW){  //discharge. Keys must leave, the bike must be in park and not charging
+      //currently it will automatically discharge if parked, not charging and the bike is off. Currently would need a switch or to start the bike while charging to avoid.
+      //Could add a large delay but doesnt seem like a good soltution
       allRelaysOpen();
       digitalWrite(RL4, HIGH);
       delay(5000); //Gives 5 seconds to discharge. Add measurments using the voltage and current readings later
       allRelaysOpen();
       operation = false; //discharging indicates the bike is no longer operating
-      Serial.println("Discharged");
+      Serial.print("Discharged");
   }
 
+  //EDGE CASES
+  else if(main_state == HIGH && park_input == 1 && operation == true){ //parking after driving but leaving the bike on
+      while(main_state == HIGH && park_input == 1 && operation == true){
+        //does not change any relays but is a required state. Want to account for edge cases
+        Serial.print("In park but Bike stays on");
+      }
+  }
+
+  //ERROR
+  else {
+    Serial.print("Not a valid state: ERROR");
+  }
 }
 
 int park(int forward_input, int reverse_input){ //checks the triple rocker switch to see if its in the middle state
