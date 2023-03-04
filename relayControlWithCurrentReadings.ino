@@ -104,7 +104,7 @@ void loop() {
   }
 
   //IDLE
-  else if(main_state == HIGH && park_input == 1 && operation == true){ //parking after driving but leaving the bike on
+  else if(main_state == HIGH && park_input == 1){ //parking after driving but leaving the bike on
       allRelaysOpen();
       //closed relays
       digitalWrite(RL1, HIGH);
