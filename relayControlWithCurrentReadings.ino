@@ -51,7 +51,7 @@ void loop() {
   int park_input = park(forward_state, reverse_state);
 
   float voltage = (144*analogRead(A0))/1023.0; //gives the voltage.
-  float current = (7.5*analogRead(A1))/1023.0; //gives the current
+  float current = (7.5*analogRead(A4))/1023.0; //gives the current.
 
 
   //CHARGING
@@ -96,7 +96,6 @@ void loop() {
       //Could add a large delay but doesnt seem like a good soltution
       allRelaysOpen();
       digitalWrite(RL4, HIGH);
-      //while voltage and/or current is above 0?
       delay(5000); //Gives 5 seconds to discharge. Add measurments using the voltage and current readings later? Change Length?
       allRelaysOpen();
       operation = false; //discharging indicates the bike is no longer operating
@@ -104,7 +103,7 @@ void loop() {
   }
 
   //IDLE
-  else if(main_state == HIGH && park_input == 1){ //parking after driving but leaving the bike on
+  else if(main_state == HIGH && park_input == 1){
       allRelaysOpen();
       //closed relays
       digitalWrite(RL1, HIGH);
