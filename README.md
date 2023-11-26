@@ -1,4 +1,4 @@
-# SM-32 Relay System Control
+# SM-21 Relay System Control
 
 This Arduino code is designed to control a relay system for the SM-23, providing functionalities for ignition, charging, operation, and discharge states of the bike and transitions between them. 
 
